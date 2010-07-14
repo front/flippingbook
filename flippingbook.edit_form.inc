@@ -117,4 +117,7 @@ function flippingbook_edit_form_submit($form, &$form_state) {
   else{
     drupal_write_record('flippingbook', $flippingbook);
   }
+
+  $form_state['redirect'] = 'node/'. $flippingbook['nid'];
+  drupal_set_message(t('FlippingBook settings has been saved'));
 }
