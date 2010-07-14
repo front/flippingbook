@@ -1,0 +1,141 @@
+<?php
+
+function flippingbook_menu() {
+  $menu['flippingbook/%node'] = array(
+    'page callback' => 'flippingbook_view',
+    'page arguments' => array(1),
+    'access callback' => 'flippingbook_access',
+    'access arguments' => array(1, 'view'),
+  );
+
+  $menu['node/%node/book-settings'] = array(
+    'title' => 'Book Settings',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('flippingbook_node_settings', 1),
+    'access callback' => 'flippingbook_access',
+    'access arguments' => array(1, 'settings'),
+  );
+
+  return $menu;
+}
+
+function flippingbook_theme() {
+  $theme['flippingbook'] = array(
+    'arguments' => array(
+      'node' => null,
+      'current_page' => 1,
+    ),
+    'template' => 'flippingbook',
+  );
+
+  return $theme;
+}
+
+function flippingbook_access($node, $op = 'view') {
+  $fields = _flippingbook_get_fields($node->type);
+  return count($fields);
+}
+
+function flippingbook_view($node) {
+  print theme('flippingbook', $node, 1);
+}
+
+function flippingbook_node_settings(&$form_state, $node) {
+  $contents = variable_get('fb_contents_'.$node->nid, array());
+  $contents_value = array();
+  foreach ($contents as $item) {
+    $contents_value[] = join('|', $item);
+  }
+
+  $form['contents'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Contents of Book'),
+    '#default_value' => join("\n", $contents_value),
+  );
+
+  $form['advanced_settings'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Advanced Settings'),
+    '#default_value' => variable_get('fb_settings_'.$node->nid, ''),
+  );
+
+  $form['#node'] = $node;
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+
+  return $form;
+}
+
+function flippingbook_node_settings_submit($form, &$form_state) {
+  $node = $form['#node'];
+  variable_set('fb_settings_'.$node->nid, $form_state['values']['advanced_settings']);
+
+  $contents = array();
+  foreach(array_map('trim', explode("\n", $form_state['values']['contents'])) as $item) {
+    list($label, $page) = array_map('trim', explode('|', $item));
+    $contents[] = array(filter_xss_admin($label), $page);
+  }
+
+  variable_set('fb_contents_'.$node->nid, $contents);
+}
+
+function flippingbook_form_alter($form, $form_state, $form_id) {
+  if ($form_id != 'content_field_edit_form') return;
+  if (@$form['#field']['widget']['module'] != 'pdf_to_imagefield') return;
+
+  dpm($form_id);
+  dpm($form);
+  dpm($form_state);
+}
+
+function _flippingbook_get_fields($node_type) {
+  $fields = content_fields(null, $node_type);
+
+  foreach ($fields as $field) {
+    if ($field['type'] == 'filefield' && $field['widget']['module'] == 'pdf_to_imagefield') {
+      return array($field, $fields[$field['widget']['target_imagefield']]);
+    }
+  }
+}
+
+//function flippingbook_field_formatter_info() {
+//  return array(
+//    'default' => array(
+//      'label' => t('Flipping Book'),
+//      'field types' => array('filefield'),
+//    ),
+//    'advanced' => array(
+//      'label' => t('Flipping Book Advanced'),
+//      'field types' => array('filefield'),
+//    ),
+//  );
+//}
+//
+//function theme_flippingbook_formatter_default($element) {
+//  return 'Text of test field >>>'. print_r($element, true) .' <<<< ';
+//}
+//
+//function theme_flippingbook_formatter_advanced($element) {
+//  return 'Text of test field. Advanced formatter >>>'. print_r($element, true) .' <<<< ';
+//}
+
+function template_preprocess_flippingbook(&$vars) {
+  $node = $vars['node'];
+  list($src_field, $pages_field) = (array)_flippingbook_get_fields($node->type);
+
+  if ($src_field && $pages_field) {
+    $vars['contents']    = variable_get('fb_contents_'.$node->nid, array());
+    $vars['settings']    = variable_get('fb_settings_'.$node->nid, '{}');
+    $vars['downloadUrl'] = $node->{$src_field['field_name']}[0]['filepath'];
+
+    $vars['pages'] = array();
+    foreach ($node->{$pages_field['field_name']} as $page) {
+      $vars['pages'][] = '/'.$page['filepath'];
+    }
+
+    $vars['title'] = $node->title;
+  }
+}
