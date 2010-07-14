@@ -14,13 +14,15 @@
   <script type="text/javascript" src="js/flippingbook.js"></script>
   <script type="text/javascript">
   <!--//--><![CDATA[//><!--
-    flippingBook.contents = <?php print drupal_to_js($contents) ?>;
-    flippingBook.pages    = <?php print drupal_to_js($pages) ?>;
-    flippingBook.settings.flipSound = "sounds/02.mp3";
-    flippingBook.settings.downloadURL = "<?php print $downloadURL?>";
-    flippingBook.settings.backgroundImage = "img/bookBackground.jpg",
+    flippingBook.contents = <?php print drupal_to_js($flippingbook['contents']) ?>;
+    flippingBook.pages    = <?php print drupal_to_js($flippingbook['pages']) ?>;
+    var settings = <?php print drupal_to_js($flippingbook['settings']) ?>;
+    for(var key in settings) {
+    	flippingBook.settings[key] = settings[key];
+    }
+    flippingBook.settings.downloadURL = "<?php print $flippingbook['downloadURL'] ?>";
     // define custom book settings here
-    <?php print $settings ?>
+    <?php print $flippingbook['settings']['jsInitCode']; ?>
     flippingBook.create();
   //--><!]]>
   </script>

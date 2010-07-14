@@ -1,2 +1,3 @@
 name = Flipping Book
 core = 6.x
+dependencies[] = pdf_to_imagefield

@@ -1,3 +1,50 @@
 <?php
 
+/**
+ * Implemetation of hook_schema().   
+ */
+function flippingbook_schema() {
+  $schema['flippingbook'] = array(
+    'description' => t('The base table for nodes.'),
+    'fields' => array(
+      'nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0
+      ),
+      'contents' => array(
+        'type' => 'text',
+        'serialize' => TRUE,
+        'description' => t('Contents of book.'),
+        'default' => 'NULL',
+      ),
+      'settings' => array(
+        'type' => 'text',
+        'serialize' => TRUE,
+        'description' => t('Custom settings section.'),
+        'default' => 'NULL',
+      ),      
+    ),
+    'primary key' => array('nid'),
+  );
+  
+  return $schema;	
+}
 
+	
+/**
+ * Implemetation of hook_install(). 
+ */
+function flippingbook_install() {
+	drupal_install_schema('flippingbook');
+}
+
+/**
+ * Implemetation of hook_uninstall(). 
+ */
+function flippingbook_uninstall() {
+  drupal_uninstall_schema('flippingbook');
+  variable_del('flippingbook_node_types');
+  variable_del('flippingbook_node_settings');
+}
