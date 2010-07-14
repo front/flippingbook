@@ -64,7 +64,10 @@ function flippingbook_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
       break;
       
     case 'load': 
-      return array('flippingbook' => (array)flippingbook_load($node));
+      $node_types = variable_get('flippingbook_node_types', array());
+      if (in_array($node->type, $node_types)) { 
+        return array('flippingbook' => (array)flippingbook_load($node));
+      }
   }
 }
 
