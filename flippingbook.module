@@ -65,7 +65,7 @@ function flippingbook_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
       
     case 'load': 
       $node_types = variable_get('flippingbook_node_types', array());
-      if (in_array($node->type, $node_types)) { 
+      if (@$node_types[$node->type]) { 
         return array('flippingbook' => (array)flippingbook_load($node));
       }
   }
@@ -108,7 +108,7 @@ function flippingbook_link($type, $object, $teaser = FALSE) {
  */
 function flippingbook_access($op = 'view', $node) {
   $node_types = variable_get('flippingbook_node_types', array());
-  return in_array($node->type, $node_types) && user_access("$op flippingbook");
+  return @$node_types[$node->type] && user_access("$op flippingbook");
 }
 
 /**
@@ -123,7 +123,7 @@ function flippingbook_load($node) {
     
 
   $pages = array();
-  foreach ($node->{$pages_field['field_name']} as $page) {
+  foreach ((array)$node->{$pages_field['field_name']} as $page) {
     $pages[] = '/'.$page['filepath'];
   }  
   $downloadURL = '/'. $node->{$src_field['field_name']}[0]['filepath'];
