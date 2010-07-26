@@ -39,7 +39,7 @@ function flippingbook_book_settings_form($settings = null) {
   $titles['zoomHintEnabled'] = t('Zoom Hint Enabled');
   $titles['jsInitCode'] = t('Advanced Settings');
   
-  $descriptions['jsInitCode'] = t('Put here javascript code for advanced FlippingBook initialization');
+  $descriptions['jsInitCode'] = t('Put javascript code for advanced FlippingBook initialization here');
   
   foreach ($settings as $key => $value) {
     $element_type = gettype($defaults[$key]) == 'boolean' ? 'checkbox' : 'textfield';
@@ -75,7 +75,7 @@ function flippingbook_edit_form(&$form_state, $node) {
       
   $form['flippingbook']['contents'] = array(
     '#type' => 'textarea',
-    '#title' => t('Contents of Book'),
+    '#title' => t('Table of contents'),
     '#default_value' => join("\n", $contents_value),
   );
   
