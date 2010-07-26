@@ -83,9 +83,19 @@ function flippingbook_link($type, $object, $teaser = FALSE) {
         'title' => t('View FlippingBook'),
         'href' => "node/$object->nid/flippingbook",
       );
+      
+      $popup_url = url("node/$object->nid/flippingbook");
+      $links['view_flippingbook_popup'] = array(
+        'title' => t('View FlippingBook popup'),
+        'href' => "node/$object->nid/flippingbook",
+        'attributes' => array(
+          'target' => '_blank',
+          'onclick' => "window.open('$popup_url','','menubar=0,resizable=1'); return false;"
+        ),
+      );
     }
   }
-
+  
   return $links;
 }
 
