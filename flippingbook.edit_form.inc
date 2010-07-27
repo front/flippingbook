@@ -57,38 +57,36 @@ function flippingbook_book_settings_form($settings = null) {
 function flippingbook_edit_form(&$form_state, $node) {
   $form['#node'] = $node;
   
-  if (is_array($node->flippingbook['contents'])) {
-    $contents = $node->flippingbook['contents'];
-    $contents_value = array();  
-    
-    foreach ($contents as $item) {
-      $contents_value[] = join('|', $item);
+  if (!isset($form_state['values']['contents'])) {
+    if (is_array($node->flippingbook['contents'])) {
+      $contents = array();
+      
+      foreach ($node->flippingbook['contents'] as $index => $item) {
+         $item[] = $index;
+         $contents[] = array_combine(array('title', 'page', 'weight'), $item);
+      }
+      
+      $form_state['values']['contents'] = $contents;
     }
   }
-  else {
-    $contents_value = array();
-  }
 
-  $form['flippingbook'] = array(
-    '#tree' => true,
-  );
-      
-  $form['flippingbook']['contents'] = array(
-    '#type' => 'textarea',
+  $form['contents_container'] = array(
+    '#type' => 'fieldset',
     '#title' => t('Table of contents'),
-    '#default_value' => join("\n", $contents_value),
   );
+  $form['contents_container'] += flippingbook_contents_form($form_state);
   
-  $form['flippingbook']['settings'] = array(
+  $form['settings'] = array(
     '#tree' => true,
     '#type' => 'fieldset',
     '#title' => t('Custom Settings'),
     '#collapsible' => true,
+    '#collapsed' => true,
   );
   
-  $form['flippingbook']['settings'] += flippingbook_book_settings_form($node->flippingbook['settings']);
-  $form['flippingbook']['settings']['jsInitCode']['#access'] = user_access('edit flippingbook advanced settings');
-  $form['flippingbook']['settings']['jsInitCode']['#type'] = 'textarea';
+  $form['settings'] += flippingbook_book_settings_form($node->flippingbook['settings']);
+  $form['settings']['jsInitCode']['#access'] = user_access('edit flippingbook advanced settings');
+  $form['settings']['jsInitCode']['#type'] = 'textarea';
   
   $form['submit'] = array(
     '#type' => 'submit',  
@@ -99,16 +97,17 @@ function flippingbook_edit_form(&$form_state, $node) {
 }
 
 function flippingbook_edit_form_submit($form, &$form_state) {
-  $flippingbook = $form_state['values']['flippingbook'];
+  $flippingbook = array(
+    'nid' => $form['#node']->nid,
+    'settings' => $form_state['values']['settings'],
+  );
 
   $contents = array();
-  foreach(array_map('trim', explode("\n", $flippingbook['contents'])) as $item) {
-    list($label, $page) = array_map('trim', explode('|', $item));
-    $contents[] = array(filter_xss_admin($label), $page);
+  foreach($form_state['values']['contents'] as $item) {
+    $contents[] = array(filter_xss_admin($item['title']), $item['page']);
   }
-  
+
   $flippingbook['contents'] = $contents;
-  $flippingbook['nid'] = $form['#node']->nid;
   
   $exists_query = 'SELECT nid FROM {flippingbook} WHERE nid = %d';
   if (db_result(db_query($exists_query, $flippingbook['nid']))) {
@@ -120,4 +119,145 @@ function flippingbook_edit_form_submit($form, &$form_state) {
 
   $form_state['redirect'] = 'node/'. $flippingbook['nid'];
   drupal_set_message(t('FlippingBook settings has been saved'));
+}
+
+
+function flippingbook_contents_form(&$form_state) {
+  $form['contents'] = array(
+    '#prefix' => '<div id="flippingbook-contents-wrapper">',
+    '#suffix' => '</div>',
+    '#theme' => 'flippingbook_contents_form',
+    '#tree' => true,
+  );
+  
+  if (!isset($form_state['values']['contents']) && !count($form_state['values']['contents'])) {
+    $contents = array(array('title' => '', 'page' => '', 'weight' => 0));
+  }
+  else {
+    $contents = $form_state['values']['contents'];
+  }
+
+  foreach ($contents as $index => $item) {
+    $element = array(
+      '#weight' => $item['weight'],
+    );
+    $element['page'] = array(
+      '#type' => 'textfield',
+      '#size' => 5,
+      '#maxlength' => 5,
+      '#default_value' => $item['page'],
+      '#element_validate' => array('_flippingbook_validate_page_number'),
+    );
+    $element['title'] = array(
+      '#type' => 'textfield',
+      '#default_value' => $item['title'],
+    );
+    $element['weight'] = array(
+      '#type' => 'weight', 
+      '#default_value' => $item['weight'],
+    );
+    $element['remove'] = array(
+      '#type' => 'checkbox',
+    );
+    
+    $form['contents'][] = $element;
+  }
+  
+  $form['add'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add new'),
+    '#submit' => array('flippingbook_contents_add'),
+    '#ahah' => array(
+      'path' => 'flippingbook-contents-ahah',
+      'wrapper' => 'flippingbook-contents-wrapper',
+      'method' => 'replace',
+    ),  
+  );
+  
+  $form['remove'] = array(
+    '#type' => 'submit',
+    '#value' => t('Remove selected'),
+    '#submit' => array('flippingbook_contents_remove'),
+    '#ahah' => array(
+      'path' => 'flippingbook-contents-ahah',
+      'wrapper' => 'flippingbook-contents-wrapper',
+      'method' => 'replace',
+    ),    
+  );
+  
+  return $form;
+}
+
+function _flippingbook_validate_page_number($element, &$form_state) {
+  if (!is_numeric($element['#value'])) {
+    form_error($element, t('Page must be a numerical value'));
+  } 
+}
+
+function flippingbook_contents_add($form, &$form_state) {
+  $form_state['values']['contents'][] = array('title' => '', 'page' => '', 'weight' => 10);
+  $form_state['rebuild'] = true;
+}
+
+function flippingbook_contents_remove($form, &$form_state) {
+  foreach ($form_state['values']['contents'] as $index => $item) {
+    if ($item['remove']) {
+      unset($form_state['values']['contents'][$index]);
+    }
+  }
+  $form_state['rebuild'] = true;
+}
+
+/**
+ * Theme contents form
+ * 
+ * @param array $form
+ * @return string
+ */
+function theme_flippingbook_contents_form($form) {
+  $header = array('', t('Page'), t('Title'), t('Weight'), t('Delete'));
+  drupal_add_tabledrag('flippingbook-contents', 'order', 'sibling', 'item-weight');
+
+  foreach (element_children($form) as $key) {
+    // Add class to group weight fields for drag and drop.
+    $form[$key]['weight']['#attributes']['class'] = 'item-weight';
+
+    $row = array('');
+    $row[] = drupal_render($form[$key]['page']);
+    $row[] = drupal_render($form[$key]['title']);
+    $row[] = drupal_render($form[$key]['weight']);
+    $row[] = drupal_render($form[$key]['remove']);
+    $rows[] = array('data' => $row, 'class' => 'draggable');
+  }
+  $output = theme('table', $header, $rows, array('id' => 'flippingbook-contents'));
+  $output .= drupal_render($form);
+  return $output;
+}
+
+/**
+ * AHAH callback for contents form 
+ */
+function flippingbook_contents_ahah() {
+  $form_state = array('storage' => NULL, 'submitted' => FALSE);
+  $form_build_id = $_POST['form_build_id'];
+  // Get the form from the cache.
+  $form = form_get_cache($form_build_id, $form_state);
+  $args = $form['#parameters'];
+  $form_id = array_shift($args);
+  // We will run some of the submit handlers so we need to disable redirecting.
+  $form['#redirect'] = FALSE;
+  // We need to process the form, prepare for that by setting a few internals
+  // variables.
+  $form['#post'] = $_POST;
+  $form['#programmed'] = FALSE;
+  $form_state['post'] = $_POST;
+  // Build, validate and if possible, submit the form.
+  drupal_process_form($form_id, $form, $form_state);
+  // This call recreates the form relying solely on the form_state that the
+  // drupal_process_form set up.
+  $form = drupal_rebuild_form($form_id, $form_state, $args, $form_build_id);
+  // Render the new output.
+  $output = theme('status_messages') . drupal_render($form['contents_container']['contents']);
+
+  drupal_json(array('status' => TRUE, 'data' => $output));  
 }

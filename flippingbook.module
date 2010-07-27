@@ -28,6 +28,14 @@ function flippingbook_menu() {
     'file' => 'flippingbook.edit_form.inc',
     'type' => MENU_LOCAL_TASK,
   );
+  
+  $menu['flippingbook-contents-ahah'] = array(
+    'description' => 'FlippingBook contents form AHAH callback',
+    'page callback' => 'flippingbook_contents_ahah',
+    'access callback' => true,
+    'file' => 'flippingbook.edit_form.inc',
+    'type' => MENU_CALLBACK,
+  );
 
   return $menu;
 }
@@ -42,6 +50,13 @@ function flippingbook_theme() {
       'current_page' => 1,
     ),
     'template' => 'flippingbook',
+  );
+  
+  $theme['flippingbook_contents_form'] = array(
+    'arguments' => array(
+      'form' => null,
+    ),
+    'file' => 'flippingbook.edit_form.inc', 
   );
 
   return $theme;
