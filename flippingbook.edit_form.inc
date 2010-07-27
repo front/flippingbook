@@ -3,9 +3,9 @@
 function flippingbook_book_settings_defaults() {
   $settings['bookWidth'] = 1000;
   $settings['bookHeight'] = 667;
-  $settings['pageBackgroundColor'] = '0xc2c2c2'; // baksiden av boka
-  $settings['backgroundColor'] = '0xb3b3b3';
-  $settings['zoomUIColor'] = '0x919d6c';
+  $settings['pageBackgroundColor'] = '#c2c2c2'; // baksiden av boka
+  $settings['backgroundColor'] = '#b3b3b3';
+  $settings['zoomUIColor'] = '#919d6c';
 //  $settings['useCustomCursors'] = false;
   $settings['dropShadowEnabled'] = false;
   $settings['zoomImageWidth'] = 1061;
@@ -39,16 +39,32 @@ function flippingbook_book_settings_form($settings = null) {
   $titles['zoomHintEnabled'] = t('Zoom Hint Enabled');
   $titles['jsInitCode'] = t('Advanced Settings');
   
-  $descriptions['jsInitCode'] = t('Put javascript code for advanced FlippingBook initialization here');
+  $options['flipCornerStyle'] = array(
+    "first page only" => t("automatically flip corner for the first page only"), 
+    "each page" => t("automatically flip corner for all pages"), 
+    "manually" => t("don't flip corner automatically"), 
+  );
   
+  $descriptions['jsInitCode'] = t('Put javascript code for advanced FlippingBook initialization here');
+
   foreach ($settings as $key => $value) {
-    $element_type = gettype($defaults[$key]) == 'boolean' ? 'checkbox' : 'textfield';
     $form[$key] = array(
-      '#type' => $element_type,
+      '#type' => 'textfield',
       '#title' => $titles[$key],
       '#description' => @$descriptions[$key],
       '#default_value' => $value,
     );
+    
+    if (stripos($key, 'enabled') > -1) {
+      $form[$key]['#type'] = 'checkbox';
+    }
+    elseif (stripos($key, 'color') > -1 && module_exists('colorpicker')) {
+      $form[$key]['#type'] = 'colorpicker_textfield';
+    }
+    elseif (isset($options[$key])) {
+      $form[$key]['#type'] = 'select';
+      $form['flipCornerStyle']['#options'] = $options[$key];
+    }
   }
   
   return $form;
