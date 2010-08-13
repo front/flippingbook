@@ -17,10 +17,21 @@
     flippingBook.contents = <?php print drupal_to_js($flippingbook['contents']) ?>;
     flippingBook.pages    = <?php print drupal_to_js($flippingbook['pages']) ?>;
     var settings = <?php print drupal_to_js($flippingbook['settings']) ?>;
+    var colorSettingRe = /Color$/;
     for(var key in settings) {
     	flippingBook.settings[key] = settings[key];
+
+      if (colorSettingRe.test(key)) {
+    	  flippingBook.settings[key] = parseInt(flippingBook.settings[key].toString().slice(1), 16);
+      }
     }
     flippingBook.settings.downloadURL = "<?php print $flippingbook['downloadURL'] ?>";
+    
+    if (flippingBook.settings.zoomImagecachePreset) {
+    	flippingBook.settings.zoomPath = "<?php print base_path() . file_directory_path() ?>/imagecache/" + flippingBook.settings.zoomImagecachePreset + "/";
+    	flippingBook.settings.zoomEnabled = true;
+    }
+    
     // define custom book settings here
     <?php print $flippingbook['settings']['jsInitCode']; ?>
     flippingBook.create();

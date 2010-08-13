@@ -14,6 +14,7 @@ function flippingbook_book_settings_defaults() {
   $settings['flipCornerStyle'] = "first page only";
   $settings['zoomHintEnabled'] = false;
   $settings['jsInitCode'] = '';
+  $settings['zoomImagecachePreset'] = '';
   
   return $settings;
 }
@@ -22,8 +23,10 @@ function flippingbook_book_settings_defaults() {
 function flippingbook_book_settings_form($settings = null) {
   $defaults = flippingbook_book_settings_defaults();
   if (!is_array($settings) || count($settings) == 0) {
-    $settings = variable_get('flippingbook_book_settings', $defaults); 
+    $settings = variable_get('flippingbook_book_settings', array()); 
   }
+  
+  $settings += $defaults;
   
   $titles['bookWidth'] = t('Book Width');
   $titles['bookHeight'] = t('Book Height');
@@ -38,7 +41,7 @@ function flippingbook_book_settings_form($settings = null) {
   $titles['flipCornerStyle'] = t('Flip Corner Style');
   $titles['zoomHintEnabled'] = t('Zoom Hint Enabled');
   $titles['jsInitCode'] = t('Advanced Settings');
-  
+    
   $options['flipCornerStyle'] = array(
     "first page only" => t("automatically flip corner for the first page only"), 
     "each page" => t("automatically flip corner for all pages"), 
@@ -46,6 +49,15 @@ function flippingbook_book_settings_form($settings = null) {
   );
   
   $descriptions['jsInitCode'] = t('Put javascript code for advanced FlippingBook initialization here');
+  
+  if (module_exists('imagecache')) {
+    $titles['zoomImagecachePreset'] = t('Zoom ImageCache Preset');
+    $presets = array('' => t('<none>'));
+    foreach (module_invoke('imagecache', 'presets') as $preset) {
+      $presets[$preset['presetname']] = $preset['presetname'];
+    }
+    $options['zoomImagecachePreset'] = $presets;
+  }
 
   foreach ($settings as $key => $value) {
     $form[$key] = array(
@@ -63,7 +75,7 @@ function flippingbook_book_settings_form($settings = null) {
     }
     elseif (isset($options[$key])) {
       $form[$key]['#type'] = 'select';
-      $form['flipCornerStyle']['#options'] = $options[$key];
+      $form[$key]['#options'] = $options[$key];
     }
   }
   

@@ -150,8 +150,8 @@ function flippingbook_load($node) {
   $book->pages = $pages;
   $book->contents = unserialize($book->contents);
   $book->settings = unserialize($book->settings);
-  $book->downloadURL = $downloadURL;  
-  
+  $book->downloadURL = $downloadURL; 
+
   return (array)$book;
 }
 
