@@ -63,6 +63,8 @@ function flippingbook_book_settings_form($settings = null) {
   }
 
   foreach ($settings as $key => $value) {
+    if (!isset($titles[$key])) continue;
+    
     $form[$key] = array(
       '#type' => 'textfield',
       '#title' => $titles[$key],
