@@ -34,6 +34,10 @@
       }
     }
     flippingBook.settings.downloadURL = "<?php print $flippingbook['downloadURL'] ?>";
+
+    if (flippingBook.settings.flipSound[0] != '/') {
+    	flippingBook.settings.flipSound = Drupal.settings.FlippingBook.path + '/' + flippingBook.settings.flipSound;
+    }
     
     // define custom book settings here
     <?php print $flippingbook['settings']['jsInitCode']; ?>

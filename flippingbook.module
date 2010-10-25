@@ -149,6 +149,8 @@ function flippingbook_load($node) {
   list($src_field, $pages_field) = (array)_flippingbook_get_fields($node->type);
   if (!$src_field || !$pages_field) return;
   
+  $libpath = drupal_get_path('module', 'flippingbook') .'/lib';
+  
   $res  = db_query('SELECT * FROM {flippingbook} WHERE nid = %d', $node->nid);
   $book = db_fetch_object($res);
   $book->title = $node->title;
@@ -171,7 +173,7 @@ function flippingbook_load($node) {
   else {
     $book->settings['zoomEnabled'] = false;
   }
-
+  
   $pages = array();
   foreach ((array)$node->{$book->field_name} as $i => $page) {
     $pages[] = $pagesBasePath . $i;
