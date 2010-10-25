@@ -15,6 +15,7 @@ function flippingbook_book_settings_defaults() {
   $settings['zoomHintEnabled'] = false;
   $settings['jsInitCode'] = '';
   $settings['zoomImagecachePreset'] = '';
+  $settings['normalImagecachePreset'] = '';
   
   return $settings;
 }
@@ -23,7 +24,7 @@ function flippingbook_book_settings_defaults() {
 function flippingbook_book_settings_form($settings = null) {
   $defaults = flippingbook_book_settings_defaults();
   if (!is_array($settings) || count($settings) == 0) {
-    $settings = variable_get('flippingbook_book_settings', array()); 
+    $settings = variable_get('flippingbook_book_settings', array());
   }
   
   $settings += $defaults;
@@ -43,20 +44,22 @@ function flippingbook_book_settings_form($settings = null) {
   $titles['jsInitCode'] = t('Advanced Settings');
     
   $options['flipCornerStyle'] = array(
-    "first page only" => t("automatically flip corner for the first page only"), 
-    "each page" => t("automatically flip corner for all pages"), 
-    "manually" => t("don't flip corner automatically"), 
+    "first page only" => t("automatically flip corner for the first page only"),
+    "each page" => t("automatically flip corner for all pages"),
+    "manually" => t("don't flip corner automatically"),
   );
   
   $descriptions['jsInitCode'] = t('Put javascript code for advanced FlippingBook initialization here');
   
   if (module_exists('imagecache')) {
     $titles['zoomImagecachePreset'] = t('Zoom ImageCache Preset');
+    $titles['normalImagecachePreset'] = t('Normal ImageCache Preset');
     $presets = array('' => t('<none>'));
     foreach (module_invoke('imagecache', 'presets') as $preset) {
       $presets[$preset['presetname']] = $preset['presetname'];
     }
     $options['zoomImagecachePreset'] = $presets;
+    $options['normalImagecachePreset'] = $presets;
   }
 
   foreach ($settings as $key => $value) {
@@ -117,7 +120,7 @@ function flippingbook_edit_form(&$form_state, $node) {
   $form['settings']['jsInitCode']['#type'] = 'textarea';
   
   $form['submit'] = array(
-    '#type' => 'submit',  
+    '#type' => 'submit',
     '#value' => 'Save',
   );
                        
@@ -181,7 +184,7 @@ function flippingbook_contents_form(&$form_state) {
       '#default_value' => $item['title'],
     );
     $element['weight'] = array(
-      '#type' => 'weight', 
+      '#type' => 'weight',
       '#default_value' => $item['weight'],
     );
     $element['remove'] = array(
@@ -199,7 +202,7 @@ function flippingbook_contents_form(&$form_state) {
       'path' => 'flippingbook-contents-ahah',
       'wrapper' => 'flippingbook-contents-wrapper',
       'method' => 'replace',
-    ),  
+    ),
   );
   
   $form['remove'] = array(
@@ -210,7 +213,7 @@ function flippingbook_contents_form(&$form_state) {
       'path' => 'flippingbook-contents-ahah',
       'wrapper' => 'flippingbook-contents-wrapper',
       'method' => 'replace',
-    ),    
+    ),
   );
   
   return $form;
@@ -219,7 +222,7 @@ function flippingbook_contents_form(&$form_state) {
 function _flippingbook_validate_page_number($element, &$form_state) {
   if (!is_numeric($element['#value'])) {
     form_error($element, t('Page must be a numerical value'));
-  } 
+  }
 }
 
 function flippingbook_contents_add($form, &$form_state) {
@@ -238,7 +241,7 @@ function flippingbook_contents_remove($form, &$form_state) {
 
 /**
  * Theme contents form
- * 
+ *
  * @param array $form
  * @return string
  */
@@ -263,7 +266,7 @@ function theme_flippingbook_contents_form($form) {
 }
 
 /**
- * AHAH callback for contents form 
+ * AHAH callback for contents form
  */
 function flippingbook_contents_ahah() {
   $form_state = array('storage' => NULL, 'submitted' => FALSE);
@@ -287,5 +290,5 @@ function flippingbook_contents_ahah() {
   // Render the new output.
   $output = theme('status_messages') . drupal_render($form['contents_container']['contents']);
 
-  drupal_json(array('status' => TRUE, 'data' => $output));  
+  drupal_json(array('status' => TRUE, 'data' => $output));
 }

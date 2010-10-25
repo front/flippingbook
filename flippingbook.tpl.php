@@ -1,17 +1,3 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <base href="/<?php print $directory ?>/lib/" />
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <title> <?php print $title ?> </title>
-  <link rel="shortcut icon"
-    href="http://www.loplabbet.no/skin/frontend/default/default/favicon.ico"
-    type="image/x-icon" />
-  <link type="text/css" href="css/liquid-green.css" rel="stylesheet" />
-
-  <script type="text/javascript" src="js/liquid.js"></script>
-  <script type="text/javascript" src="js/swfobject.js"></script>
-  <script type="text/javascript" src="js/flippingbook.js"></script>
   <script type="text/javascript">
   <!--//--><![CDATA[//><!--
     flippingBook.contents = <?php print drupal_to_js($flippingbook['contents']) ?>;
@@ -27,10 +13,13 @@
     }
     flippingBook.settings.downloadURL = "<?php print $flippingbook['downloadURL'] ?>";
     
-    if (flippingBook.settings.zoomImagecachePreset) {
-    	flippingBook.settings.zoomPath = "<?php print base_path() . file_directory_path() ?>/imagecache/" + flippingBook.settings.zoomImagecachePreset + "/";
-    	flippingBook.settings.zoomEnabled = true;
-    }
+//    if (flippingBook.settings.zoomImagecachePreset) {
+//    	flippingBook.settings.zoomPath = "<?php print base_path() . file_directory_path() ?>/imagecache/" + flippingBook.settings.zoomImagecachePreset + "/";
+//    	flippingBook.settings.zoomEnabled = true;
+//    }
+//    else {
+//      flippingBook.settings.zoomEnabled = false;
+//    }
     
     // define custom book settings here
     <?php print $flippingbook['settings']['jsInitCode']; ?>
@@ -38,8 +27,6 @@
   //--><!]]>
   </script>
 
-</head>
-<body>
   <div id="fbContainer">
     <a class="altlink" href="http://www.adobe.com/shockwave/download/download.cgi?P1_Prod_Version=ShockwaveFlash">
       <div id="altmsg">Download Adobe Flash Player.</div>
@@ -53,13 +40,12 @@
       <span id="fbTotalPages" class="fbPaginationMinor"></span>
     </div>
     <div id="fbMenu">
-      <img src="img/btnZoom.gif"    width="36" height="40" border="0" id="fbZoomButton" />
-      <img src="img/btnPrint.gif"    width="36" height="40" border="0" id="fbPrintButton" />
-      <img src="img/btnDownload.gif" width="36" height="40" border="0" id="fbDownloadButton" />
-      <img src="img/btnDiv.gif"      width="13" height="40" border="0" />
-      <img src="img/btnPrevious.gif" width="36" height="40" border="0" id="fbBackButton" />
-      <img src="img/btnNext.gif"     width="36" height="40" border="0" id="fbForwardButton" />
+      <img src="/<?php print $directory ?>/lib/img/btnZoom.gif"    width="36" height="40" border="0" id="fbZoomButton" />
+      <img src="/<?php print $directory ?>/lib/img/btnPrint.gif"    width="36" height="40" border="0" id="fbPrintButton" />
+      <img src="/<?php print $directory ?>/lib/img/btnDownload.gif" width="36" height="40" border="0" id="fbDownloadButton" />
+      <img src="/<?php print $directory ?>/lib/img/btnDiv.gif"      width="13" height="40" border="0" />
+      <img src="/<?php print $directory ?>/lib/img/btnPrevious.gif" width="36" height="40" border="0" id="fbBackButton" />
+      <img src="/<?php print $directory ?>/lib/img/btnNext.gif"     width="36" height="40" border="0" id="fbForwardButton" />
     </div>
   </div>
-</body>
-</html>
+  

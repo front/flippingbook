@@ -19,14 +19,22 @@ function flippingbook_admin_settings_form() {
     '#default_value' => variable_get('flippingbook_node_types', array()),
   );
   
+  $form['flippingbook_override_node_output'] = array(
+    '#title' => t('Override Page Node View'),
+    '#type'  => 'checkbox',
+    '#description' => t('Allows to display FlippingBook view instead of standart drupal node view'),
+    '#default_value' => variable_get('flippingbook_override_node_output', 0),
+  );
+  
   $form['flippingbook_book_settings'] = array(
     '#title' => t('Default Book Settings'),
     '#type'  => 'fieldset',
     '#tree'  => true,
   );
   
+  
   module_load_include('inc', 'flippingbook', 'flippingbook.edit_form');
-  $form['flippingbook_book_settings'] += flippingbook_book_settings_form();
+  $form['flippingbook_book_settings'] += flippingbook_book_settings_form(variable_get('flippingbook_book_settings', array()));
   $form['flippingbook_book_settings']['jsInitCode']['#type'] = 'textarea';
   
   return system_settings_form($form);
