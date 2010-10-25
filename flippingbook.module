@@ -41,7 +41,7 @@ function flippingbook_menu() {
     'type' => MENU_CALLBACK,
   );
   
-  $menu['flippingbook'] = array(
+  $menu['flippingbook/%node'] = array(
     'page callback' => 'flippingbook_imagecache_pdf_page',
     'page arguments' => array(1),
     'access callback' => TRUE,
@@ -130,12 +130,9 @@ function flippingbook_preprocess_page(&$vars) {
 //  dpm($vars);
 //}
 
-function flippingbook_theme_registry_alter(&$theme_registry) {
-  $theme_registry['page']['theme paths'][] = drupal_get_path('module', 'flippingbook');
-  
-//  dpm(__FUNCTION__);
-//  dpm(func_get_args());
-}
+//function flippingbook_theme_registry_alter(&$theme_registry) {
+//  $theme_registry['page']['theme paths'][] = drupal_get_path('module', 'flippingbook');
+//}
 
 
 /**
@@ -187,22 +184,24 @@ function flippingbook_access($op = 'view', $node) {
 function flippingbook_load($node) {
   list($src_field, $pages_field) = (array)_flippingbook_get_fields($node->type);
   if (!$src_field || !$pages_field) return;
-    
+  
   $res  = db_query('SELECT * FROM {flippingbook} WHERE nid = %d', $node->nid);
   $book = db_fetch_object($res);
   $book->title = $node->title;
   $book->contents = unserialize($book->contents);
   $book->settings = unserialize($book->settings);
+  $book->field_name = $pages_field['field_name'];
+  
   
   
   $normalImagecachePreset = isset($book->settings['normalImagecachePreset'])
                           ? $book->settings['normalImagecachePreset']
                           : 'none';
   
-  $pagesBasePath = base_path().'flippingbook/'. $normalImagecachePreset .'/';
+  $pagesBasePath = base_path().'flippingbook/'. $node->nid .'/'. $normalImagecachePreset .'/';
 
   if (isset($book->settings['zoomImagecachePreset'])) {
-    $book->settings['zoomPath'] = base_path() .'flippingbook/'. $book->settings['zoomImagecachePreset'] .'/';
+    $book->settings['zoomPath'] = base_path() .'flippingbook/'. $node->nid .'/'. $book->settings['zoomImagecachePreset'] .'/';
     $book->settings['zoomEnabled'] = true;
   }
   else {
@@ -210,8 +209,8 @@ function flippingbook_load($node) {
   }
 
   $pages = array();
-  foreach ((array)$node->{$pages_field['field_name']} as $page) {
-    $pages[] = $pagesBasePath . $page['filename'];
+  foreach ((array)$node->{$book->field_name} as $i => $page) {
+    $pages[] = $pagesBasePath . $i;
   }
   $downloadURL = '/'. $node->{$src_field['field_name']}[0]['filepath'];
   
@@ -254,26 +253,26 @@ function _flippingbook_get_fields($node_type) {
  *
  * @param object $node
  * @param string $preset
- * @param string $filepath
+ * @param string $page
  */
-function flippingbook_imagecache_pdf_page() {
+function flippingbook_imagecache_pdf_page($node, $preset = 'none') {
   $args = func_get_args();
-  array_shift($args);
-  $preset = array_shift($args);
-  $filename = array_pop($args);
-  $filepath = file_directory_path() .'/'. $filename;
+  $page = array_pop($args);
+  
+  $field_name = $node->flippingbook['field_name'];
+  $filepath = @$node->{$field_name}[$page]['filepath'];
   
   if (!empty($preset) || file_exists($filepath)) {
-    if (!module_exists('imagecache') || $preset == 'none') {
-      module_invoke('imagecache', 'cache', $preset, $filepath);
-      return;
-    }
-    else {
+    if ($preset == 'none' || !module_exists('imagecache')) {
       $headers = module_invoke_all('file_download', $filepath);
       if (count($headers)) {
         file_transfer($filepath, $headers);
         return;
       }
+    }
+    else {
+      module_invoke('imagecache', 'cache', $preset, $filepath);
+      return;
     }
   }
   
