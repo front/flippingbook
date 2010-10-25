@@ -103,9 +103,11 @@ function flippingbook_preprocess_page(&$vars) {
   if (isset($vars['node']) && isset($node_types[$vars['node']->type])) {
     if (arg(2) == '' && variable_get('flippingbook_override_node_output', 0)) {
       $vars['template_files'][] = 'page-node-flippingbook';
+      if (isset($_GET['popup'])) {
+        $vars['template_files'][] = 'page-node-flippingbook-popup';
+      }
     }
     $node = $vars['node'];
-//  var_dump($vars);
   }
 }
 
@@ -148,7 +150,7 @@ function flippingbook_link($type, $object, $teaser = FALSE) {
         'href' => "node/$object->nid/flippingbook",
       );
       
-      $popup_url = url("node/$object->nid/flippingbook");
+      $popup_url = url("node/$object->nid/flippingbook", array('query' => 'popup=1'));
       $links['view_flippingbook_popup'] = array(
         'title' => t('View FlippingBook popup'),
         'href' => "node/$object->nid/flippingbook",
