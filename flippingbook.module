@@ -196,6 +196,7 @@ function flippingbook_view($node, $current_page = 1) {
   drupal_add_js("$path/lib/js/liquid.js");
   drupal_add_js("$path/lib/js/swfobject.js");
   drupal_add_js("$path/lib/js/flippingbook.js");
+  drupal_add_js(array('FlippingBook' => array('path' => base_path(). $path .'/lib')), 'setting');
 
   drupal_set_html_head('<base href="'. base_path() . $path .'/lib/" />');
   

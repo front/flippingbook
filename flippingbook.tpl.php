@@ -1,5 +1,27 @@
   <script type="text/javascript">
   <!--//--><![CDATA[//><!--
+    FlippingBook.prototype.create = function(){
+      this.settings.pagesSet = this.pages;
+      this.settings.zoomPagesSet = this.zoomPages;
+      this.settings.printPagesSet = this.printPages;
+      
+      if( location.hash.substr(1) != "" )
+        this.settings.firstPageNumber = location.hash.substr(1);
+      Drupal.settings.FlippingBook.path
+      this.addLoadEvent( this.onWindowLoad );
+      swfobject.embedSWF(
+          Drupal.settings.FlippingBook.path + "/FlippingBook.swf",
+          this.containerId,
+          this.stageWidth,
+          this.stageHeight,
+          "8.0.0",
+          Drupal.settings.FlippingBook.path + "/js/expressInstall.swf",
+          this.settings,
+          {allowScriptAccess: "always", bgcolor:  "#" + this.settings.backgroundColor.toString( 16 ) }
+      );
+    };
+
+  
     flippingBook.contents = <?php print drupal_to_js($flippingbook['contents']) ?>;
     flippingBook.pages    = <?php print drupal_to_js($flippingbook['pages']) ?>;
     var settings = <?php print drupal_to_js($flippingbook['settings']) ?>;
@@ -12,14 +34,6 @@
       }
     }
     flippingBook.settings.downloadURL = "<?php print $flippingbook['downloadURL'] ?>";
-    
-//    if (flippingBook.settings.zoomImagecachePreset) {
-//    	flippingBook.settings.zoomPath = "<?php print base_path() . file_directory_path() ?>/imagecache/" + flippingBook.settings.zoomImagecachePreset + "/";
-//    	flippingBook.settings.zoomEnabled = true;
-//    }
-//    else {
-//      flippingBook.settings.zoomEnabled = false;
-//    }
     
     // define custom book settings here
     <?php print $flippingbook['settings']['jsInitCode']; ?>
