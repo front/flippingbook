@@ -98,45 +98,6 @@ function flippingbook_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   }
 }
 
-function flippingbook_preprocess_page(&$vars) {
-  $node_types = variable_get('flippingbook_node_types', array());
-  if (isset($vars['node']) && isset($node_types[$vars['node']->type])) {
-    if (arg(2) == '' && variable_get('flippingbook_override_node_output', 0)) {
-      $vars['template_files'][] = 'page-node-flippingbook';
-      if (isset($_GET['popup'])) {
-        $vars['template_files'][] = 'page-node-flippingbook-popup';
-      }
-    }
-    $node = $vars['node'];
-  }
-}
-
-
-/**
- * A theme preprocess function to automatically allow view-based node
- * templates if called from a view.
- *
- * The 'modules/node.views.inc' file is a better place for this, but
- * we haven't got a chance to load that file before Drupal builds the
- * node portion of the theme registry.
- */
-//function flippingbook_preprocess_node(&$vars) {
-//  if ($vars['page'] && $vars['teaser']) {
-//    $vars['content'] = flippingbook_view($vars['node']);
-//    $node_types = variable_get('flippingbook_node_types', array());
-//    isset($node_types[$vars['type']])
-//
-//    $vars['template_files'][] = 'node-flippingbook'
-//  }
-//  dpm(__FUNCTION__);
-//  dpm($vars);
-//}
-
-//function flippingbook_theme_registry_alter(&$theme_registry) {
-//  $theme_registry['page']['theme paths'][] = drupal_get_path('module', 'flippingbook');
-//}
-
-
 /**
  * Implemetation of hook_link().
  */
