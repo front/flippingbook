@@ -154,6 +154,7 @@ function flippingbook_link($type, $object, $teaser = FALSE) {
       $links['view_flippingbook_popup'] = array(
         'title' => t('View FlippingBook popup'),
         'href' => "node/$object->nid/flippingbook",
+        'query' => 'popup=1',
         'attributes' => array(
           'target' => '_blank',
           'onclick' => "window.open('$popup_url','','menubar=0,resizable=1'); return false;"
